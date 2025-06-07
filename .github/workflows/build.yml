@@ -1,0 +1,54 @@
+name: Build Kernel
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Bước 1: Checkout mã nguồn từ repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Bước 2: Cài đặt môi trường build
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bc bison build-essential ccache curl flex gcc g++ git gnupg gperf \
+          libncurses5-dev libssl-dev libxml2-utils lzop openjdk-11-jdk python3 python-is-python3 \
+          unzip xz-utils zip zlib1g-dev
+
+    # Bước 3: Tải và cài đặt toolchain (GCC hoặc Clang)
+    - name: Download GCC toolchain
+      run: |
+        wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+        tar -xf gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
+        echo "::add-path::$(pwd)/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi/bin"
+
+    # Bước 4: Cấu hình kernel
+    - name: Configure Kernel
+      run: |
+        export ARCH=arm64
+        export CROSS_COMPILE=$(pwd)/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi/bin/aarch64-none-elf-
+        make .config
+
+    # Bước 5: Build kernel
+    - name: Build Kernel
+      run: |
+        export ARCH=arm64
+        export CROSS_COMPILE=$(pwd)/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi/bin/aarch64-none-elf-
+        make -j$(nproc)
+
+    # Bước 6: Upload artifacts
+    - name: Upload Kernel Image
+      uses: actions/upload-artifact@v3
+      with:
+        name: kernel-build
+        path: arch/arm64/boot/
