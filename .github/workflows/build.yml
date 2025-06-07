@@ -1,7 +1,13 @@
 name: Build Kernel
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - lineage-21-rel
+  pull_request:
+    branches:
+      - lineage-21-rel
+
 
 jobs:
   build-kernel:
