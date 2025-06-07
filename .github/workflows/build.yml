@@ -30,7 +30,7 @@ jobs:
       run: |
         wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
         tar -xf gcc-arm-10.2-2020.11-x86_64-arm-none-eabi.tar.xz
-        echo "::add-path::$(pwd)/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi/bin"
+        echo "$(pwd)/gcc-arm-10.2-2020.11-x86_64-arm-none-eabi/bin" >> $GITHUB_PATH
 
     # Bước 4: Cấu hình kernel
     - name: Configure Kernel
