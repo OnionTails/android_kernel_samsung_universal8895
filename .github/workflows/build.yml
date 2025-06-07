@@ -24,4 +24,5 @@ jobs:
           aosp-gcc: true
           aosp-clang: true
           android-version: 14
-          other-clang-url: https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-stable.tar.gz
+          aosp-clang-version: r547379
+         
