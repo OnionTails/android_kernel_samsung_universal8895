@@ -27,8 +27,8 @@ jobs:
         make repo cpio kmod openssl libelf-dev pahole libssl-dev libarchive-tools zstd --fix-missing
         
         # Cài đặt libtinfo5
-        wget http://ports.ubuntu.com/pool/universe/n/ncurses/libtinfo5_6.3-2_arm64.deb
-        sudo dpkg -i libtinfo5_6.3-2_arm64.deb
+        wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
+        sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
 
     # Bước 3: Build kernel (ví dụ)
     - name: Build Kernel
