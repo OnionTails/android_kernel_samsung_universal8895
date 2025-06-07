@@ -33,10 +33,7 @@ jobs:
     # Bước 3: Build kernel (ví dụ)
     - name: Build Kernel
       run: |
-        export ARCH=arm64
-        export CROSS_COMPILE=aarch64-linux-gnu-
-        make <your_defconfig>
-        make -j$(nproc)
+        make
 
     # Bước 4: Upload artifacts (tùy chọn)
     - name: Upload Kernel Artifacts
@@ -45,3 +42,4 @@ jobs:
         name: kernel-build
         path: |
           arch/arm64/boot/Image*
+          arch/arm64/boot/dts/*
