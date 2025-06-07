@@ -33,6 +33,7 @@ jobs:
     # Bước 3: Build kernel (ví dụ)
     - name: Build Kernel
       run: |
+        export CROSS_COMPILE=aarch64-linux-gnu-
         make
 
     # Bước 4: Upload artifacts (tùy chọn)
