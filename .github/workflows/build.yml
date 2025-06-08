@@ -34,7 +34,9 @@ jobs:
     - name: Build Kernel
       run: |
         export CROSS_COMPILE=aarch64-linux-gnu-
-        make -j$(nproc) LDFLAGS_vmlinux="$(aarch64-linux-gnu-gcc -print-libgcc-file-name)"
+        make mrproper
+        make defconfig
+        make CONFIG_NO_INT128=1
     # Bước 4: Upload artifacts (tùy chọn)
     - name: Upload Kernel Artifacts
       uses: actions/upload-artifact@v4
