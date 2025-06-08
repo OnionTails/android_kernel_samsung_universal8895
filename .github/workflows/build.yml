@@ -29,5 +29,13 @@ jobs:
     # Bước 3: Build kernel
     - name: Build Kernel
       run: |
-        aarch64-linux-gnu-gcc -print-libgcc-file-name
-          
+        export CROSS_COMPILE=aarch64-linux-gnu-
+        make 
+    # Bước 4: Upload artifacts (tùy chọn)
+    - name: Upload Kernel Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: kernel-build
+        path: |
+          arch/arm64/boot/Image*
+          arch/arm64/boot/dts/*
