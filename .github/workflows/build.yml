@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - lineage-21-rel
-  pull_request:
-    branches:
-      - lineage-21-rel
 
 jobs:
   build:
@@ -17,24 +14,37 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Bước 2: Cài đặt tất cả dependencies
+    # Bước 2: Cài đặt dependencies hệ thống
     - name: Install Dependencies
       run: |
         sudo apt update
         sudo apt install -y git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils erofs-utils \
-        default-jdk git gnupg flex bison gperf build-essential zip curl libc6-dev libncurses-dev libx11-dev libreadline-dev libgl1 libgl1-mesa-dev \
-        python3 make sudo gcc g++ bc grep tofrodos python3-markdown libxml2-utils xsltproc zlib1g-dev python-is-python3 libc6-dev libtinfo6 \
-        make repo gcc-aarch64-linux-gnu libc6-dev-arm64-cross cpio kmod openssl libelf-dev pahole libssl-dev libarchive-tools zstd gcc-aarch64-linux-gnu --fix-missing
-        
-        # Cài đặt libtinfo5
+        default-jdk gnupg flex bison gperf build-essential zip curl libc6-dev libncurses-dev libx11-dev libreadline-dev libgl1 libgl1-mesa-dev \
+        bc grep tofrodos python3-markdown libxml2-utils xsltproc libc6-dev libtinfo6 repo cpio kmod openssl libelf-dev pahole libssl-dev libarchive-tools zstd wget ca-certificates --fix-missing
+
+        # Cài libtinfo5 để hỗ trợ toolchain cũ nếu cần
         wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
         sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
-    # Bước 3: Build kernel
+
+    # Bước 3: Clone Clang prebuilt từ AOSP
+    - name: Download AOSP Clang Toolchain
+      run: |
+        git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 --depth=1
+
+    # Bước 4: Build Kernel với Clang
     - name: Build Kernel
       run: |
-        export CROSS_COMPILE=aarch64-linux-gnu-
-        make
-    # Bước 4: Upload artifacts (tùy chọn)
+        export CLANG_PATH=$PWD/linux-x86/clang-r518229b
+        export PATH=$CLANG_PATH/bin:$PATH
+
+        export ARCH=arm64
+        export SUBARCH=arm64
+        export CROSS_COMPILE=aarch64-linux-android-
+        export CLANG_TRIPLE=aarch64-linux-android-
+
+        make LLVM=1 CC=clang LD=ld.lld
+
+    # Bước 5: Upload artifacts
     - name: Upload Kernel Artifacts
       uses: actions/upload-artifact@v4
       with:
