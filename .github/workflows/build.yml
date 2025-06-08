@@ -4,17 +4,14 @@ on:
   push:
     branches:
       - lineage-21-rel
-
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-    # Bước 1: Checkout mã nguồn
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Bước 2: Cài đặt dependencies hệ thống
     - name: Install Dependencies
       run: |
         sudo apt update
@@ -22,29 +19,30 @@ jobs:
         default-jdk gnupg flex bison gperf build-essential zip curl libc6-dev libncurses-dev libx11-dev libreadline-dev libgl1 libgl1-mesa-dev \
         bc grep tofrodos python3-markdown libxml2-utils xsltproc libc6-dev libtinfo6 repo cpio kmod openssl libelf-dev pahole libssl-dev libarchive-tools zstd wget ca-certificates --fix-missing
 
-        # Cài libtinfo5 để hỗ trợ toolchain cũ nếu cần
+        # Cài libtinfo5 nếu kernel cần
         wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
         sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
 
-    # Bước 3: Clone Clang prebuilt từ AOSP
-    - name: Download AOSP Clang Toolchain
+    - name: Download Clang Toolchain (Android 14 clang-r487747c)
       run: |
-        git clone https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86 --depth=1
+        mkdir -p toolchain/clang
+        cd toolchain/clang
+        wget https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/android14-release/clang-r487747c.tar.gz
+        tar -xzf clang-r487747c.tar.gz
 
-    # Bước 4: Build Kernel với Clang
-    - name: Build Kernel
+    - name: Build Kernel with Clang
       run: |
-        export CLANG_PATH=$PWD/linux-x86/clang-r518229b
+        export CLANG_PATH=$PWD/toolchain/clang
         export PATH=$CLANG_PATH/bin:$PATH
 
         export ARCH=arm64
         export SUBARCH=arm64
         export CROSS_COMPILE=aarch64-linux-android-
         export CLANG_TRIPLE=aarch64-linux-android-
+        export AS=llvm-as  # Tránh lỗi -EL như bạn từng gặp
 
-        make LLVM=1 CC=clang LD=ld.lld
+        make LLVM=1 AS=llvm-as CC=clang LD=ld.lld
 
-    # Bước 5: Upload artifacts
     - name: Upload Kernel Artifacts
       uses: actions/upload-artifact@v4
       with:
