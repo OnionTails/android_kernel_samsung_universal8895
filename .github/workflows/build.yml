@@ -26,11 +26,15 @@ jobs:
         # Cài đặt libtinfo5
         wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
         sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb
+    - name: Install GCC Toolchain
+      run: |
+        sudo apt update
+        sudo apt install -y gcc-aarch64-linux-gnu libc6-dev-arm64-cross
     # Bước 3: Build kernel
     - name: Build Kernel
       run: |
         export CROSS_COMPILE=aarch64-linux-gnu-
-        make 
+        make -j$(nproc) LDFLAGS_vmlinux="$(aarch64-linux-gnu-gcc -print-libgcc-file-name)"
     # Bước 4: Upload artifacts (tùy chọn)
     - name: Upload Kernel Artifacts
       uses: actions/upload-artifact@v4
